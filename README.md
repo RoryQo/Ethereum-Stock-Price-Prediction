@@ -32,9 +32,16 @@ Fit a simple linear regression model using time as the predictor.
 
 Visualize the residuals from the model.
 
+<img src="https://github.com/RoryQo/Ethereum-Stock-Price-Prediction/blob/main/Graph2.jpg" alt="Graph 2" style="width:400px"/>
+
+
 ### Durbin-Watson Test
 
 Perform a Durbin-Watson test to check for autocorrelation in the residuals.
+
+```
+durbinWatsonTest(model)
+```
 
 ## Correlation Analysis
 
@@ -43,6 +50,10 @@ Create lagged terms for the price and calculate correlations.
 ## Autoregressive Model
 
 Fit an autoregressive model using the first four lagged terms.
+
+```
+model = ar.ols(ethereum$price, order.max = 10, demean = F, intercept = T)
+```
 
 ### Durbin-Watson Test for Autoregressive Model
 
