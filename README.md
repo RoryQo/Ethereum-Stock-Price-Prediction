@@ -52,6 +52,9 @@ Check for autocorrelation in the residuals.
 
 Plot the actual vs. fitted values from the autoregressive model.
 
+<img src="https://github.com/RoryQo/Ethereum-Stock-Price-Prediction/blob/main/graph1.jpg" alt="Ethereum Price Prediction" style="width:600px"/>
+
+
 ## Conclusion
 
 This code provides a comprehensive approach to predicting Ethereum stock prices using linear and autoregressive models.
