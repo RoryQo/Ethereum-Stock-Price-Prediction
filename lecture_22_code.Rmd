@@ -1,0 +1,134 @@
+---
+title: "Ethereum Stock Price Prediction"
+output: html_document
+---
+
+Read in data
+
+```{r,message=F,warning=F}
+require(car)
+ethereum = read.table("ethereum_price.csv", header = TRUE, sep = ",")
+
+```
+
+Time series plot of Ethereum price vs. time
+
+```{r}
+plot.ts(ethereum$price, 
+        xlab = "Days Since 1/1/2022", 
+        ylab = "Ethereum Price (in Dollars)", 
+        main = "Ethereum Price Over Time", 
+        col = "steelblue", 
+        lwd = 2, 
+        lty = 1, 
+        pch = 19, 
+        cex = 0.5, 
+        xaxt = "n")  # suppress default x-axis
+
+# Customizing x-axis
+axis(1, at = seq(0, length(ethereum$price), by = 30), 
+     labels = seq(0, length(ethereum$price) / 30, by = 1))  # Adjust the sequence as needed
+
+# Add gridlines for better readability
+grid()
+```
+
+Residual plot for model using time as the predictor
+
+```{r}
+model = lm(price ~ time, data = ethereum)  # Create simple linear regression model
+ethereum$res = residuals(model)  # Save residuals to data frame
+plot.ts(ethereum$res, xlab = "Days Since 1/1/2022", ylab = "Residual",col="steelblue",lwd=2)  # Create plot
+abline(a=0, b=0,lty = 2,col="red")  # Horizontal line at 0
+```
+
+Durbin-Watson Test for simple linear regression using time as the only predictor
+
+```{r}
+model = lm(price ~ time, data = ethereum)
+durbinWatsonTest(model)
+```
+
+Created lagged terms for an order of 10
+
+```{r}
+ethereum$lag1[2:94] = ethereum$price[1:93]
+ethereum$lag2[3:94] = ethereum$price[1:92]
+ethereum$lag3[4:94] = ethereum$price[1:91]
+ethereum$lag4[5:94] = ethereum$price[1:90]
+ethereum$lag5[6:94] = ethereum$price[1:89]
+ethereum$lag6[7:94] = ethereum$price[1:88]
+ethereum$lag7[8:94] = ethereum$price[1:87]
+ethereum$lag8[9:94] = ethereum$price[1:86]
+ethereum$lag9[10:94] = ethereum$price[1:85]
+ethereum$lag10[11:94] = ethereum$price[1:84]
+```
+
+Create correlations between price and first 10 lagged values and round correlations to 4 decimal places
+
+```{r}
+round(cor(ethereum[c(11:94),c(3:13)]),4)
+
+# Notice that the first 10 rows cannot be used in the correlation matrix because lagged values do not exist for all of the variables.  January 11 is the first date where all observations have a lagged value.  This is the reason the first argument is c(11:94).  This tells R to use rows 11 through 94.  The actual Ethereum price is contained in column 3 and the lagged values are in columns 4:13.  The second argument c(3:13) tells R to use only columns 3 through 13 in the correlation matrix.
+```
+
+Autoregressive model - Lag 1
+
+```{r}
+model = lm(price ~ lag1, data = ethereum)
+summary(model)
+```
+
+Fit autoregressive model using 'ar.ols' function and a maxmimum order of 10.  R will fit all models up to order 10 and choose the one that works the best for the data.
+
+```{r}
+model = ar.ols(ethereum$price, order.max = 10, demean = F, intercept = T)
+model  # Note that the summary function does not work for the 'ar.ols' function.  Just print 'model' to see the optimal order and corresponding coefficients.
+```
+
+Durbin-Watson Test for autoregressive model of order 4
+
+```{r}
+
+model = lm(price ~ lag1 + lag2 + lag3 + lag4, data = ethereum)   # Fit the best model chosen above by the 'ar.ols' function and using the first 4 lagged terms also created above
+durbinWatsonTest(model)  # Run the Durbin-Watson test on the autoregressive model of order 4
+```
+
+Residual plot for autoregressive model of order 4
+
+```{r}
+ethereum$res = NA  # Create a new column in the data frame first
+ethereum$res[5:94] = residuals(model)  # Save the residuals in rows 5 through 94.  Because the lag 4 term doesn't exist until the 5th observation, rows 1 through 4 will be empty.
+plot.ts(ethereum$res, xlab = "Days Since 1/1/2022", ylab = "Residual")  # Create residual plot
+abline(a = 0, b = 0)  # Horizontal line at 0
+```
+
+Model graph
+```{r}
+summary(model)
+fitted_values <- predict(model)
+
+# Create a time series plot
+plot(ethereum$price, 
+     type = "l",  # Line type for actual prices
+     col = "lightgray", 
+     xlab = "Days Since 1/1/2022", 
+     ylab = "Ethereum Price (in Dollars)", 
+     main = "Actual vs. Fitted Ethereum Prices",
+     lwd = 2)
+
+# Add fitted values to the plot
+lines(fitted_values, 
+      col = "steelblue", 
+      lwd = 2)
+
+# Add a legend
+legend("topleft", 
+       legend = c("Actual Price", "Fitted Values"), 
+       col = c("lightgray", "steelblue"), 
+       lwd = 2)
+
+# Optionally, add gridlines
+grid()
+```
+
