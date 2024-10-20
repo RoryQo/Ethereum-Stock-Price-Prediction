@@ -1,7 +1,7 @@
 # Ethereum Stock Price Prediction
 
 This README provides an overview of the code for predicting Ethereum stock prices using linear regression and autoregressive models. It includes data preparation, model fitting, and visualization steps.
-
+ 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [Data Input](#data-input)
