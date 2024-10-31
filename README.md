@@ -4,7 +4,7 @@ This README provides an overview of the code for predicting Ethereum stock price
  
 ## Table of Contents 
 1. [Prerequisites](#prerequisites)
-2. [Data Input](#data-input)
+2. [Data Input](#data-input) 
 3. [Time Series Plot](#time-series-plot)
 4. [Modeling](#modeling)
 5. [Correlation Analysis](#correlation-analysis)
